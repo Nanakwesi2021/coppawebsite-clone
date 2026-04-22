@@ -2265,3 +2265,22 @@ button {
     display: inline-block;
   }
 }
+
+/* --- Image Stability Fix for Mobile --- */
+@media (max-width: 768px) {
+  img, 
+  .hero-content-right img,
+  .cocktail-image img,
+  .story-images img,
+  .insta-grid img,
+  .contact-image-wrapper img {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+    will-change: transform;
+  }
+}
+
