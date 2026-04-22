@@ -406,6 +406,9 @@ button {
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
+  color: var(--color-forest);
+  background: transparent;
+  transition: all 0.3s ease;
 }
 
 .filter-btn.active, .filter-btn:hover {
@@ -1168,43 +1171,6 @@ button {
   color: black;
   border-color: white;
   box-shadow: 0 10px 30px rgba(255,255,255,0.1);
-}
-
-.filter-btn {
-  background: none;
-  border: none;
-  color: rgba(255,255,255,0.5);
-  font-family: var(--font-heading);
-  font-size: 14px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 10px 0;
-  position: relative;
-  transition: color 0.3s ease;
-}
-
-.filter-btn::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--color-lime);
-  transition: width 0.3s ease;
-}
-
-.filter-btn:hover {
-  color: white;
-}
-
-.filter-btn.active {
-  color: var(--color-lime);
-}
-
-.filter-btn.active::after {
-  width: 100%;
 }
 
 .gallery-masonry {
@@ -2026,3 +1992,276 @@ button {
 
 .card-meta .dot { font-size: 10px; color: var(--color-lime); }
 
+
+/* --- Consolidated Mobile Optimization --- */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  [id] {
+    scroll-margin-top: 160px;
+  }
+
+  :root {
+    --section-spacing: 50px;
+  }
+
+  .container {
+    padding: 0 15px;
+  }
+
+  .section-padding {
+    padding: var(--section-spacing) 0;
+  }
+
+  /* Header & Navigation */
+  .header {
+    padding: 15px 0;
+    position: fixed; /* Better for mobile UX */
+    background: var(--color-white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .nav-menu {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .nav-menu a {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .logo img {
+    height: 35px;
+  }
+
+  /* Hero Sections */
+  .hero {
+    height: auto;
+    min-height: 80vh;
+    padding-top: 120px;
+    padding-bottom: 60px;
+  }
+
+  .hero-title {
+    font-size: clamp(32px, 10vw, 48px);
+    max-width: 100%;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .hero-content-left {
+    text-align: center;
+  }
+
+  .slider-indicator {
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  /* Adjust Page Margins */
+  .section-padding[style*="margin-top: 130px"],
+  .gallery-page[style*="margin-top: 130px"],
+  .find-us-hero,
+  .about-hero,
+  .wholesale-hero {
+    margin-top: 160px !important;
+  }
+
+  /* Grid Systems */
+  .cocktail-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .story-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .story-text h1 {
+    font-size: 42px;
+  }
+
+  .story-images {
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 150px;
+  }
+
+  /* Contact Page */
+  .contact-layout-new {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-image-wrapper {
+    min-height: 300px;
+  }
+
+  .contact-form-container {
+    padding: 40px 20px;
+  }
+
+  .contact-info-overlay {
+    padding: 20px;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Find Us */
+  .find-us-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .location-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stockist-grid {
+    gap: 40px;
+  }
+
+  /* Wholesale */
+  .wholesale-grid-new {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .wholesale-hero-content h1 {
+    font-size: 48px;
+  }
+
+  /* About */
+  .about-hero-content h1 {
+    font-size: 48px;
+  }
+
+  .about-row {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .about-row.row-reverse {
+    direction: ltr;
+  }
+
+  .about-col-text h2 {
+    font-size: 32px;
+  }
+
+  .row-num {
+    font-size: 48px;
+    top: -20px;
+    left: 0;
+  }
+
+  /* Instagram */
+  .insta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .instagram-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  /* Gallery Masonry */
+  .gallery-masonry {
+    grid-template-columns: 1fr;
+    grid-auto-rows: 300px;
+  }
+
+  .gallery-item--big, .gallery-item--wide, .gallery-item--tall {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+
+  .gallery-intro {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .intro-left h2 {
+    font-size: 42px;
+  }
+
+  /* Footer */
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 40px;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* Mobile Buttons */
+  .btn {
+    width: 100%;
+    padding: 15px 20px;
+  }
+
+  .whatsapp-float {
+    width: 55px;
+    height: 55px;
+    bottom: 25px;
+    right: 20px;
+    position: fixed !important;
+    z-index: 999999;
+  }
+}
+
+/* --- Additional Mobile Fixes --- */
+@media (max-width: 768px) {
+  .filter-bar, .gallery-filter-bar {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    justify-content: flex-start;
+    padding: 10px 20px;
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+  }
+
+  .filter-bar::-webkit-scrollbar, 
+  .gallery-filter-bar::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome, Safari and Opera */
+  }
+
+  .filter-btn, .gallery-filter-btn {
+    flex: 0 0 auto;
+    padding: 8px 18px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+}
+
+/* --- Header Polish for Mobile --- */
+@media (max-width: 768px) {
+  .nav-menu a {
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 4px;
+    display: inline-block;
+  }
+}
