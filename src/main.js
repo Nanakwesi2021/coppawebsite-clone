@@ -15,6 +15,7 @@ const Header = () => `
         <a href="#about">ABOUT US</a>
         <a href="#cocktails">OUR COCKTAILS</a>
         <a href="#story">COPPA VIBE</a>
+        <a href="#find-us">STOCKISTS</a>
         <a href="#wholesale">WHOLESALE</a>
         <a href="#contact">CONTACT</a>
       </nav>
@@ -538,6 +539,8 @@ const router = () => {
     content = WholesalePage();
   } else if (hash === '#contact') {
     content = ContactPage();
+  } else if (hash === '#find-us') {
+    content = FindUsPage();
   } else if (hash === '#terms') {
     content = LegalPage('Terms & Conditions');
   } else if (hash === '#privacy') {
