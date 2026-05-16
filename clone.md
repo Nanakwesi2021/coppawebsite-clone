@@ -1,0 +1,2 @@
+clone this website https://www.coppacocktails.com/
+Act as a Literal Technical Executor. Do not offer 'improvements,' 'refinements,' or aesthetic suggestions. Your task is strictly limited to the specific delta requested. Maintain the existing codebase/design as an immutable foundation. Do not modify any logic, styling, or structure outside the explicit scope of this request. If a change is not explicitly requested, it must remain untouched. Do not hallucinate additional features or 'clean up' existing code.

@@ -159,7 +159,7 @@ const CocktailsPage = () => {
     <div class="container">
       <div class="section-header reveal">
         <h1>Our Cocktails</h1>
-        <p>Explore our range of over 15 delicious ready-to-drink cocktails.</p>
+        <p>Explore our range of over 7 delicious ready-to-drink cocktails.</p>
       </div>
       
       <div class="filter-bar reveal">
