@@ -1,5 +1,7 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "coppa-ghana-2026"
+  },
   "targets": {},
   "etags": {}
 }
