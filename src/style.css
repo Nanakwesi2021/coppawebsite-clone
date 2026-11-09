@@ -2169,10 +2169,6 @@ button {
     position: relative;
   }
 
-  [id] {
-    scroll-margin-top: 160px;
-  }
-
   :root {
     --section-spacing: 50px;
   }
@@ -2183,36 +2179,6 @@ button {
 
   .section-padding {
     padding: var(--section-spacing) 0;
-  }
-
-  /* Header & Navigation */
-  .header {
-    padding: 15px 0;
-    position: fixed; /* Better for mobile UX */
-    background: var(--color-white);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .nav-menu {
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-    padding: 0 10px;
-  }
-
-  .nav-menu a {
-    font-size: 11px;
-    letter-spacing: 0.05em;
-  }
-
-  .logo img {
-    height: 35px;
   }
 
   /* Hero Sections */
@@ -2238,15 +2204,6 @@ button {
     bottom: 20px;
     right: 50%;
     transform: translateX(50%);
-  }
-
-  /* Adjust Page Margins */
-  .section-padding[style*="margin-top: 130px"],
-  .gallery-page[style*="margin-top: 130px"],
-  .find-us-hero,
-  .about-hero,
-  .wholesale-hero {
-    margin-top: 160px !important;
   }
 
   /* Grid Systems */
@@ -2421,16 +2378,6 @@ button {
     padding: 8px 18px;
     font-size: 11px;
     letter-spacing: 0.05em;
-  }
-}
-
-/* --- Header Polish for Mobile --- */
-@media (max-width: 768px) {
-  .nav-menu a {
-    padding: 5px 10px;
-    background: rgba(0,0,0,0.03);
-    border-radius: 4px;
-    display: inline-block;
   }
 }
 
@@ -3009,8 +2956,681 @@ a.cocktail-card:focus-visible {
   border-top: 0;
 }
 
-/* On small phones the nav wraps to three rows (header ~186px), so pages need more top space */
+
+
+/* ===== The Coppa Box (home promo, #box order page, call-outs) ===== */
+.nav-menu a.nav-order {
+  padding: 8px 16px;
+  margin: -8px 0;
+  background: var(--color-forest);
+  border-radius: 999px;
+  color: var(--color-white);
+}
+
+.nav-menu a.nav-order:hover {
+  background: var(--color-black);
+  color: var(--color-lime);
+}
+
+.box-visual {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: linear-gradient(160deg, #fbcf46 0%, #f7b967 32%, #eb7a3a 68%, #da3e6f 100%);
+  border: 1px solid var(--color-black);
+}
+
+.box-bottles {
+  position: absolute;
+  inset: 10% 5% 7%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  container-type: size;
+}
+
+/* Bottle height fits both the frame's height and its width (7 bottles, each overlapping the next by ~30%) */
+.box-bottles img {
+  --bottle-h: min(96cqh, 52cqw);
+  position: relative;
+  flex: none;
+  height: var(--bottle-h);
+  width: auto;
+  margin-left: calc(var(--bottle-h) * -0.108);
+  rotate: var(--tilt);
+  translate: 0 var(--drop);
+  transform-origin: 50% 92%;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.22));
+}
+
+.box-bottles img:first-child {
+  margin-left: 0;
+}
+
+/* Two rows: back row slightly smaller, front row overlaps its lower half */
+.box-bottles--stacked {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  --front-h: min(72cqh, 85cqw);
+}
+
+.box-row {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.box-row--front {
+  z-index: 2;
+  margin-top: calc(var(--front-h) * -0.52);
+}
+
+.box-bottles--stacked .box-row--back img {
+  --bottle-h: calc(var(--front-h) * 0.86);
+  margin-left: calc(var(--bottle-h) * -0.06);
+}
+
+.box-bottles--stacked .box-row--front img {
+  --bottle-h: var(--front-h);
+  margin-left: calc(var(--bottle-h) * -0.04);
+}
+
+.box-bottles--stacked .box-row img:first-child {
+  margin-left: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .box-visual:hover .box-bottles img {
+    animation: bottle-wave 1.4s ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+}
+
+.box-price {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 20px 0 24px;
+  font-family: var(--font-heading);
+  font-size: 56px;
+  line-height: 1;
+  color: var(--color-forest);
+}
+
+.box-price span {
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.box-price--large {
+  margin: -8px 0 16px;
+  font-size: 72px;
+}
+
+/* Home page promo */
+.box-promo {
+  padding: 90px 0;
+  background: #fffcf4;
+  border-bottom: 1px solid var(--color-black);
+}
+
+.box-promo-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 56px;
+  align-items: center;
+}
+
+.box-promo-copy h2 {
+  margin: 14px 0 12px;
+  font-family: var(--font-heading);
+  font-size: clamp(48px, 6vw, 84px);
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+.box-promo-copy > p:not(.box-price) {
+  max-width: 44ch;
+  color: #333;
+}
+
+.box-promo-visual {
+  aspect-ratio: 16 / 10;
+}
+
+/* Order page: the bottle picture stays in view while the order form scrolls */
+.box-page-visual {
+  position: sticky;
+  top: 30px;
+  aspect-ratio: 1 / 1;
+}
+
+.box-lead {
+  margin-bottom: 28px;
+  color: #333;
+}
+
+.box-subheading {
+  margin-bottom: 14px;
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.box-contents {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 40px;
+  list-style: none;
+}
+
+.box-contents a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 8px 12px 8px 8px;
+  background: var(--color-white);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.box-contents a:hover {
+  border-color: var(--color-black);
+}
+
+.box-contents a:focus-visible {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 2px;
+}
+
+.box-contents img {
+  flex: none;
+  width: 44px;
+  height: 56px;
+  padding: 4px 0;
+  object-fit: contain;
+  background: var(--item-color);
+}
+
+.box-contents span {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: #666;
+}
+
+.box-contents strong {
+  font-size: 15px;
+  color: var(--color-black);
+}
+
+.box-order-form {
+  gap: 22px;
+  padding: 32px;
+  background: var(--color-white);
+  border: 1px solid var(--color-black);
+}
+
+.box-order-form .box-subheading {
+  margin-bottom: 0;
+}
+
+.qty-stepper {
+  display: flex;
+  width: max-content;
+  border: 1px solid rgba(26, 60, 52, 0.25);
+}
+
+.qty-stepper button {
+  width: 52px;
+  font-size: 22px;
+  background: var(--color-cream);
+  color: var(--color-forest);
+  cursor: pointer;
+}
+
+.qty-stepper button:hover {
+  background: var(--color-forest);
+  color: var(--color-white);
+}
+
+.form-group .qty-stepper input {
+  width: 72px;
+  border: 0;
+  border-left: 1px solid rgba(26, 60, 52, 0.25);
+  border-right: 1px solid rgba(26, 60, 52, 0.25);
+  background: var(--color-white);
+  text-align: center;
+  font-weight: 700;
+  -moz-appearance: textfield;
+}
+
+.qty-stepper input::-webkit-outer-spin-button,
+.qty-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.box-fulfilment {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.box-fulfilment legend {
+  width: 100%;
+  margin-bottom: 10px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: #999;
+}
+
+.box-fulfilment label,
+.box-age-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.box-fulfilment input,
+.box-age-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-forest);
+}
+
+.box-order-form [data-address-group][hidden] {
+  display: none;
+}
+
+.box-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.box-total strong {
+  font-family: var(--font-heading);
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-forest);
+}
+
+.box-order-form .btn-submit-premium {
+  margin-top: 0;
+}
+
+.box-page .product-note {
+  margin-top: 14px;
+}
+
+/* "Also in the box" link on product pages */
+.product-box-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding: 14px 18px;
+  background: #fff4ec;
+  border: 1px dashed var(--color-black);
+  font-size: 14px;
+  color: var(--color-black);
+}
+
+.product-box-callout:hover {
+  background: var(--color-white);
+  border-style: solid;
+}
+
+@media (max-width: 900px) {
+  .box-promo-inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .box-page-visual {
+    position: relative;
+    top: auto;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .box-promo {
+    padding: 50px 0;
+  }
+
+  .box-price--large {
+    font-size: 60px;
+  }
+
+  .box-order-form {
+    padding: 22px 18px;
+  }
+}
+
 @media (max-width: 480px) {
+  .box-contents {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Small laptops: tighter nav so all links fit on one row */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .nav-menu {
+    gap: 24px;
+  }
+}
+
+/* ===== Header: current-page marker, phone/tablet bar + full-screen menu ===== */
+.header-actions,
+.nav-panel-footer {
+  display: none;
+}
+
+/* Current page in the desktop nav */
+@media (min-width: 1024px) {
+  .nav-menu > a[aria-current="page"]:not(.nav-order),
+  .nav-menu .nav-dropdown-trigger[aria-current="page"] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+  }
+}
+
+@media (max-width: 1023px) {
+  :root {
+    --header-h: 68px;
+  }
+
+  .header {
+    position: fixed;
+    height: var(--header-h);
+    padding: 0;
+    background: var(--color-white);
+    border-bottom: 1px solid rgba(10, 10, 10, 0.08);
+    box-shadow: none;
+  }
+
+  .header-content {
+    height: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .logo img {
+    display: block;
+    height: 40px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .header-order {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 18px;
+    background: var(--color-forest);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-white);
+  }
+
+  .header-order:hover,
+  .header-order:active {
+    background: var(--color-black);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -10px;
+    background: none;
+    border: 0;
+    color: var(--color-black);
+    cursor: pointer;
+  }
+
+  .menu-toggle-bars {
+    position: relative;
+    display: block;
+    width: 24px;
+    height: 16px;
+  }
+
+  .menu-toggle-bars span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: top 0.3s ease, transform 0.3s ease, opacity 0.2s ease;
+  }
+
+  .menu-toggle-bars span:nth-child(1) { top: 0; }
+  .menu-toggle-bars span:nth-child(2) { top: 7px; }
+  .menu-toggle-bars span:nth-child(3) { top: 14px; }
+
+  .menu-open .menu-toggle-bars span:nth-child(1) {
+    top: 7px;
+    transform: rotate(45deg);
+  }
+
+  .menu-open .menu-toggle-bars span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menu-open .menu-toggle-bars span:nth-child(3) {
+    top: 7px;
+    transform: rotate(-45deg);
+  }
+
+  .menu-toggle:focus-visible,
+  .header-order:focus-visible {
+    outline: 2px solid var(--color-forest);
+    outline-offset: 2px;
+  }
+
+  /* The nav becomes a full-screen panel under the bar (hidden from taps and screen readers while closed) */
+  .nav-menu {
+    position: fixed;
+    top: var(--header-h);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: auto;
+    padding: 8px 24px calc(24px + env(safe-area-inset-bottom));
+    background: var(--color-cream);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-12px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+  }
+
+  .menu-open .nav-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .nav-dropdown {
+    display: block;
+  }
+
+  .nav-menu > a,
+  .nav-menu .nav-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    background: none;
+    border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+    border-radius: 0;
+    font-family: var(--font-heading);
+    font-size: 34px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--color-black);
+  }
+
+  .nav-menu > a::after,
+  .nav-menu .nav-dropdown-trigger::after {
+    content: '→';
+    font-family: var(--font-main);
+    font-size: 20px;
+    opacity: 0.35;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .nav-menu > a:hover,
+  .nav-menu .nav-dropdown-trigger:hover {
+    color: var(--color-forest);
+  }
+
+  .nav-menu > a:hover::after,
+  .nav-menu .nav-dropdown-trigger:hover::after {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
+  /* Current page: green text with a lime dot instead of the arrow */
+  .nav-menu > a[aria-current="page"],
+  .nav-menu .nav-dropdown-trigger[aria-current="page"] {
+    color: var(--color-forest);
+    text-decoration: none;
+  }
+
+  .nav-menu > a[aria-current="page"]::after,
+  .nav-menu .nav-dropdown-trigger[aria-current="page"]::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: var(--color-lime);
+    border: 1px solid var(--color-forest);
+    border-radius: 50%;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ORDER sits in the header bar instead */
+  .nav-menu a.nav-order {
+    display: none;
+  }
+
+  .nav-panel-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: auto;
+    padding-top: 32px;
+  }
+
+  .nav-menu .nav-panel-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--color-forest);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-white);
+  }
+
+  .nav-menu .nav-panel-cta:hover {
+    background: var(--color-black);
+    color: var(--color-white);
+  }
+
+  .nav-panel-cta strong {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--color-lime);
+  }
+
+  .nav-panel-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-menu .nav-panel-contact a {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--color-black);
+  }
+
+  .nav-menu .nav-panel-contact a:hover {
+    color: var(--color-forest);
+  }
+
+  .nav-panel-footer p {
+    font-size: 12px;
+    color: #666;
+  }
+
+  /* The floating WhatsApp button would sit on top of the open menu */
+  .header.menu-open ~ .whatsapp-float {
+    display: none;
+  }
+
+  /* Pages start right under the 68px header bar */
+  [id] {
+    scroll-margin-top: calc(var(--header-h) + 16px);
+  }
+
   .section-padding[style*="margin-top: 130px"],
   .gallery-page[style*="margin-top: 130px"],
   .find-us-hero,
@@ -3018,6 +3638,22 @@ a.cocktail-card:focus-visible {
   .wholesale-hero,
   .cocktails-banner,
   .product-page {
-    margin-top: 196px !important;
+    margin-top: var(--header-h) !important;
+  }
+}
+
+@media (max-width: 1023px) and (prefers-reduced-motion: reduce) {
+  .nav-menu,
+  .menu-open .nav-menu,
+  .menu-toggle-bars span {
+    transition: none;
+  }
+}
+
+/* Very narrow phones: slimmer Order button so the bar never crowds the logo */
+@media (max-width: 359px) {
+  .header-order {
+    padding: 0 14px;
+    font-size: 12px;
   }
 }

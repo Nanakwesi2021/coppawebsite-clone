@@ -1,30 +1,202 @@
 import './style.css'
-import { cocktails, cocktailDetails, story, about, stockists, galleryImages } from './data.js'
+import { cocktails, cocktailDetails, story, about, stockists, galleryImages, coppaBox } from './data.js'
 
 const app = document.querySelector('#app');
 
-const Header = () => `
+// ----- The Coppa Box (mixed box sold as one item) -----
+const BOX_MAX_QUANTITY = 50;
+const formatCedis = (amount) => `GH₵${amount.toLocaleString('en-US')}`;
+const boxCocktails = () => coppaBox.cocktailIds.map(id => cocktails.find(c => c.id === id)).filter(Boolean);
+const clampBoxQuantity = (value) => Math.min(BOX_MAX_QUANTITY, Math.max(1, Math.floor(Number(value)) || 1));
+
+// The box's bottles fanned out (middle bottle in front). stacked = two rows (4 behind, 3 in front) for square frames
+const BoxBottles = ({ stacked = false } = {}) => {
+  const bottles = boxCocktails();
+  const fan = (row, delayStart = 0) => {
+    const middle = (row.length - 1) / 2;
+    return row.map((c, i) => {
+      const offset = i - middle;
+      return `<img src="${c.image}" alt="" style="--tilt: ${offset * (stacked ? 4 : 5)}deg; --drop: ${Math.abs(offset) * (stacked ? 3 : 5)}%; --delay: ${(delayStart + i) * 0.08}s; z-index: ${10 - Math.ceil(Math.abs(offset))}">`;
+    }).join('');
+  };
+  if (!stacked) return `<div class="box-bottles" aria-hidden="true">${fan(bottles)}</div>`;
+  const back = bottles.slice(0, Math.ceil(bottles.length / 2) + (bottles.length % 2 ? 0 : 1));
+  const front = bottles.slice(back.length);
+  return `
+    <div class="box-bottles box-bottles--stacked" aria-hidden="true">
+      <div class="box-row box-row--back">${fan(back)}</div>
+      <div class="box-row box-row--front">${fan(front, back.length)}</div>
+    </div>
+  `;
+};
+
+// Home page promo for the box: price shown above the order button
+const BoxPromo = () => `
+  <section class="box-promo">
+    <div class="container box-promo-inner">
+      <div class="box-promo-copy reveal">
+        <span class="tag">Order online</span>
+        <h2>${coppaBox.name}</h2>
+        <p>Seven Coppa cocktails in one box: ${boxCocktails().map(c => titleCase(c.name)).join(', ')}.</p>
+        <p class="box-price"><span>Box price</span>${formatCedis(coppaBox.price)}</p>
+        <a href="#box" class="product-btn product-btn--primary">Order the box</a>
+      </div>
+      <a href="#box" class="box-visual box-promo-visual" aria-label="Order ${coppaBox.name}">
+        ${BoxBottles()}
+      </a>
+    </div>
+  </section>
+`;
+
+const BoxPage = () => {
+  const bottles = boxCocktails();
+  return `
+  <section class="product-page box-page">
+    <div class="container">
+      <nav class="product-breadcrumb" aria-label="Breadcrumb">
+        <a href="#cocktails">Our Cocktails</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">${coppaBox.name}</span>
+      </nav>
+
+      <div class="product-hero">
+        <div class="box-visual box-page-visual">
+          ${BoxBottles({ stacked: true })}
+        </div>
+
+        <div class="product-summary">
+          <p class="product-tags">Mixed box <span aria-hidden="true">•</span> ${bottles.length} cocktails</p>
+          <h1>${coppaBox.name}</h1>
+          <p class="box-price box-price--large"><span>Price per box</span>${formatCedis(coppaBox.price)}</p>
+          <p class="box-lead">Seven of our cocktails in one box. Chill, add ice and pour.</p>
+
+          <h2 class="box-subheading">What's in the box</h2>
+          <ul class="box-contents">
+            ${bottles.map(c => `
+              <li>
+                <a href="#cocktail/${c.id}" style="--item-color: ${c.color}">
+                  <img src="${c.image}" alt="" loading="lazy">
+                  <span><strong>${titleCase(c.name)}</strong>${c.taste}</span>
+                </a>
+              </li>
+            `).join('')}
+          </ul>
+
+          <form class="premium-form box-order-form" id="box-order-form">
+            <h2 class="box-subheading">Place your order</h2>
+
+            <div class="form-group">
+              <label for="box-quantity">NUMBER OF BOXES</label>
+              <div class="qty-stepper">
+                <button type="button" data-qty-step="-1" aria-label="One box fewer">−</button>
+                <input type="number" id="box-quantity" name="quantity" value="1" min="1" max="${BOX_MAX_QUANTITY}" inputmode="numeric" required>
+                <button type="button" data-qty-step="1" aria-label="One box more">+</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="box-name">NAME</label>
+                <input type="text" id="box-name" name="name" placeholder="Your full name" autocomplete="name" required>
+              </div>
+              <div class="form-group">
+                <label for="box-phone">PHONE</label>
+                <input type="tel" id="box-phone" name="phone" placeholder="Your phone number" autocomplete="tel" pattern="\\+?[0-9 ]{9,18}" title="Digits only, e.g. 024 000 0000 or +233 24 000 0000" required>
+              </div>
+            </div>
+
+            <fieldset class="box-fulfilment">
+              <legend>DELIVERY OR PICK-UP</legend>
+              <label><input type="radio" name="fulfilment" value="delivery" checked> Deliver to me</label>
+              <label><input type="radio" name="fulfilment" value="pickup"> I'll pick it up</label>
+            </fieldset>
+
+            <div class="form-group" data-address-group>
+              <label for="box-address">DELIVERY ADDRESS / AREA</label>
+              <textarea id="box-address" name="address" rows="2" placeholder="e.g. East Legon, near the A&amp;C Mall" autocomplete="street-address" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="box-note">NOTE (OPTIONAL)</label>
+              <textarea id="box-note" name="note" rows="2" placeholder="Preferred delivery time, gift message…"></textarea>
+            </div>
+
+            <label class="box-age-check">
+              <input type="checkbox" name="age" required>
+              <span>I confirm I am 18 or older.</span>
+            </label>
+
+            <div class="box-total" aria-live="polite">
+              <span>Total</span>
+              <strong data-box-total>${formatCedis(coppaBox.price)}</strong>
+            </div>
+
+            <button type="submit" class="btn-submit-premium">
+              <span>PLACE ORDER VIA WHATSAPP</span>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+            </button>
+          </form>
+          <p class="product-note">Your order opens in WhatsApp so we can confirm it, the delivery fee and payment with you. For adults 18+ only. Please enjoy responsibly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+`;
+};
+
+// Which top-level nav item the current page belongs to (for aria-current / active styling)
+const navSection = () => {
+  const route = (window.location.hash || '#').split('?')[0] || '#';
+  return route.startsWith('#cocktail/') ? '#cocktails' : route;
+};
+
+const Header = () => {
+  const section = navSection();
+  const current = (href) => (href === section ? 'aria-current="page"' : '');
+  return `
   <header class="header">
     <div class="container header-content">
       <div class="logo">
-        <a href="#"><img src="/images/logo.webp" alt="Coppa Cocktails"></a>
+        <a href="#" aria-label="Coppa Cocktails home"><img src="/images/logo.webp" alt="Coppa Cocktails"></a>
       </div>
-      
-      <nav class="nav-menu">
-        <a href="#">HOME</a>
-        <a href="#about">ABOUT US</a>
+
+      <!-- Phones & tablets: Order button + menu toggle (the nav below becomes a full-screen menu) -->
+      <div class="header-actions">
+        <a href="#box" class="header-order" ${current('#box')}>Order</a>
+        <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+          <span class="menu-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
+      </div>
+
+      <nav class="nav-menu" id="site-nav" aria-label="Main">
+        <a href="#" ${current('#')}>HOME</a>
+        <a href="#about" ${current('#about')}>ABOUT US</a>
         <div class="nav-dropdown">
-          <a href="#cocktails" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="mega-menu">OUR COCKTAILS</a>
+          <a href="#cocktails" class="nav-dropdown-trigger" ${current('#cocktails')} aria-haspopup="true" aria-expanded="false" aria-controls="mega-menu">OUR COCKTAILS</a>
           ${MegaMenu()}
         </div>
-        <a href="#story">COPPA VIBE</a>
-        <a href="#find-us">STOCKISTS</a>
-        <a href="#wholesale">WHOLESALE</a>
-        <a href="#contact">CONTACT</a>
+        <a href="#story" ${current('#story')}>COPPA VIBE</a>
+        <a href="#find-us" ${current('#find-us')}>STOCKISTS</a>
+        <a href="#wholesale" ${current('#wholesale')}>WHOLESALE</a>
+        <a href="#contact" ${current('#contact')}>CONTACT</a>
+        <a href="#box" class="nav-order" ${current('#box')}>ORDER</a>
+
+        <div class="nav-panel-footer">
+          <a href="#box" class="nav-panel-cta">
+            <span>Order ${coppaBox.name}</span>
+            <strong>${formatCedis(coppaBox.price)}</strong>
+          </a>
+          <div class="nav-panel-contact">
+            <a href="https://wa.me/${WHATSAPP_NUMBER}" target="_blank" rel="noopener noreferrer">WhatsApp +233 54 042 2494</a>
+            <a href="https://instagram.com/coppacocktailsgh" target="_blank" rel="noopener noreferrer">Instagram @coppacocktailsgh</a>
+          </div>
+          <p>For adults 18+ only. Please enjoy responsibly.</p>
+        </div>
       </nav>
     </div>
   </header>
 `;
+};
 
 const Footer = () => `
   <footer class="footer">
@@ -36,6 +208,7 @@ const Footer = () => `
         <div class="footer-col">
           <h4>Explore</h4>
           <a href="#cocktails">Our Cocktails</a>
+          <a href="#box">Order ${coppaBox.name}</a>
           <a href="#about">About Us</a>
           <a href="#story">Coppa Vibe</a>
           <a href="#find-us">Find Us</a>
@@ -89,6 +262,8 @@ const HomePage = () => `
       <span>ADD ICE & ENJOY 🍸 NO RULES. NO LIMITS. JUST ADD ICE & ENJOY 🍸 NO RULES. NO LIMITS. JUST ADD ICE & ENJOY 🍸 </span>
     </div>
   </section>
+
+  ${BoxPromo()}
 
   <section id="cocktails" class="section-padding cocktails-preview">
     <div class="container">
@@ -212,6 +387,7 @@ const megaMenuGroups = () => {
       key: 'format', title: 'Format & Serve', color: '#20c0ff',
       tiles: [
         ...filterTiles('Format & Serve'),
+        { label: `${coppaBox.name} · ${formatCedis(coppaBox.price)}`, href: '#box', bottles: boxCocktails() },
         { label: 'Wholesale & events', href: '#wholesale', bottles: bestsellers, background: 'var(--color-forest)' }
       ]
     }
@@ -423,6 +599,11 @@ const ProductPage = (cocktail) => {
             <a class="product-btn product-btn--primary" href="https://wa.me/${WHATSAPP_NUMBER}?text=${orderMessage}" target="_blank" rel="noopener noreferrer">Order on WhatsApp</a>
             <a class="product-btn" href="#find-us">Where to buy</a>
           </div>
+          ${coppaBox.cocktailIds.includes(cocktail.id) ? `
+          <a class="product-box-callout" href="#box">
+            <span>Also in <strong>${coppaBox.name}</strong>: ${coppaBox.cocktailIds.length} cocktails for ${formatCedis(coppaBox.price)}</span>
+            <span aria-hidden="true">→</span>
+          </a>` : ''}
           <p class="product-note">Ready to drink — just add ice. For adults 18+ only. Please enjoy responsibly.</p>
         </div>
       </div>
@@ -813,6 +994,9 @@ const router = () => {
     const cocktail = cocktails.find(c => c.id === hash.slice('#cocktail/'.length));
     content = ProductPage(cocktail);
     pageTitle = `${titleCase(cocktail.name)} | Coppa Cocktails Ghana`;
+  } else if (hash === '#box') {
+    content = BoxPage();
+    pageTitle = `${coppaBox.name} (${formatCedis(coppaBox.price)}) | Coppa Cocktails Ghana`;
   } else if (hash === '#story') {
     content = StoryPage();
   } else if (hash === '#about') {
@@ -899,6 +1083,23 @@ const initInteractions = (routeChanged = true) => {
     window.handleParallax = handleParallax;
     window.addEventListener('scroll', window.handleParallax, { passive: true });
     window.handleParallax(); // Initial call
+  }
+
+  // Phone/tablet menu: the toggle opens the nav as a full-screen panel and locks page scroll
+  const siteHeader = document.querySelector('.header');
+  const menuToggle = siteHeader && siteHeader.querySelector('.menu-toggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', () => setMobileMenuOpen(!siteHeader.classList.contains('menu-open')));
+    // Links to the page you're already on don't re-render, so close the menu explicitly
+    siteHeader.querySelectorAll('.nav-menu a, .header-order').forEach(link => {
+      link.addEventListener('click', () => setMobileMenuOpen(false));
+    });
+    siteHeader.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && siteHeader.classList.contains('menu-open')) {
+        setMobileMenuOpen(false);
+        menuToggle.focus();
+      }
+    });
   }
 
   // "OUR COCKTAILS" mega-menu (desktop with a mouse only; elsewhere the trigger is a plain link)
@@ -1143,6 +1344,35 @@ const initInteractions = (routeChanged = true) => {
     document.addEventListener('keydown', window.handleKeydown);
   }
 
+  // Coppa Box order form: quantity stepper, live total, address only needed for delivery
+  const boxForm = document.getElementById('box-order-form');
+  if (boxForm) {
+    const quantityInput = boxForm.elements.quantity;
+    const totalEl = boxForm.querySelector('[data-box-total]');
+    const addressGroup = boxForm.querySelector('[data-address-group]');
+    const updateBoxForm = () => {
+      totalEl.textContent = formatCedis(clampBoxQuantity(quantityInput.value) * coppaBox.price);
+      const delivering = boxForm.elements.fulfilment.value === 'delivery';
+      addressGroup.hidden = !delivering;
+      boxForm.elements.address.required = delivering;
+    };
+
+    boxForm.querySelectorAll('[data-qty-step]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        quantityInput.value = clampBoxQuantity(clampBoxQuantity(quantityInput.value) + Number(btn.dataset.qtyStep));
+        updateBoxForm();
+      });
+    });
+    // Tidy the typed quantity (e.g. 0 or 70) once the field is left
+    quantityInput.addEventListener('change', () => {
+      quantityInput.value = clampBoxQuantity(quantityInput.value);
+    });
+    boxForm.addEventListener('input', updateBoxForm);
+    boxForm.addEventListener('change', updateBoxForm);
+    boxForm.addEventListener('reset', () => setTimeout(updateBoxForm));
+    updateBoxForm();
+  }
+
   // Handle Forms: open WhatsApp with the form contents as a pre-filled message
   const forms = document.querySelectorAll('.premium-form');
   forms.forEach(form => {
@@ -1163,6 +1393,21 @@ const initInteractions = (routeChanged = true) => {
           `Email: ${field('email')}`,
           '',
           field('message')
+        ];
+      } else if (form.id === 'box-order-form') {
+        const quantity = clampBoxQuantity(field('quantity'));
+        const delivering = form.elements.fulfilment.value === 'delivery';
+        lines = [
+          'Hello Coppa Cocktails Ghana, I would like to place an order.',
+          '',
+          `Order: ${quantity} x ${coppaBox.name} (${formatCedis(coppaBox.price)} each)`,
+          `In each box: ${boxCocktails().map(c => titleCase(c.name)).join(', ')}`,
+          `Total: ${formatCedis(quantity * coppaBox.price)}`,
+          '',
+          `Name: ${field('name')}`,
+          `Phone: ${field('phone')}`,
+          delivering ? `Delivery to: ${field('address')}` : 'I will pick up the order.',
+          ...(field('note') ? [`Note: ${field('note')}`] : [])
         ];
       } else {
         lines = [
@@ -1189,6 +1434,23 @@ const initInteractions = (routeChanged = true) => {
 
   if (routeChanged) window.scrollTo(0, 0);
 };
+
+// Open/close the phone & tablet menu (header is re-rendered on every page, so this looks it up each time)
+function setMobileMenuOpen(open) {
+  const header = document.querySelector('.header');
+  const toggle = header && header.querySelector('.menu-toggle');
+  // No-op if already in that state, so closing never unlocks scroll that something else (the lightbox) locked
+  if (!toggle || header.classList.contains('menu-open') === open) return;
+  header.classList.toggle('menu-open', open);
+  toggle.setAttribute('aria-expanded', String(open));
+  toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+
+// The menu panel only exists below 1024px: close it if the window is widened past that
+window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
+  if (e.matches) setMobileMenuOpen(false);
+});
 
 // Close the cocktail filter panel when clicking anywhere outside it
 document.addEventListener('click', (e) => {

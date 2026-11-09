@@ -460,3 +460,19 @@ export const cocktailDetails = {
     "awards": []
   }
 };
+
+// The Coppa Box: a mixed box of seven cocktails sold as one item. Price is in Ghana cedis (GH₵).
+export const coppaBox = {
+  id: 'coppa-box',
+  name: 'The Coppa Box',
+  price: 950,
+  cocktailIds: [
+    'pina-colada',
+    'sex-on-the-beach',
+    'mojito',
+    'strawberry-daiquiri',
+    'mai-tai',
+    'passion-fruit-martini',
+    'tequila-sunrise'
+  ]
+};
