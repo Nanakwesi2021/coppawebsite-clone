@@ -1,5 +1,5 @@
 import './style.css'
-import { cocktails, story, about, stockists, galleryImages } from './data.js'
+import { cocktails, cocktailDetails, story, about, stockists, galleryImages } from './data.js'
 
 const app = document.querySelector('#app');
 
@@ -13,7 +13,10 @@ const Header = () => `
       <nav class="nav-menu">
         <a href="#">HOME</a>
         <a href="#about">ABOUT US</a>
-        <a href="#cocktails">OUR COCKTAILS</a>
+        <div class="nav-dropdown">
+          <a href="#cocktails" class="nav-dropdown-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="mega-menu">OUR COCKTAILS</a>
+          ${MegaMenu()}
+        </div>
         <a href="#story">COPPA VIBE</a>
         <a href="#find-us">STOCKISTS</a>
         <a href="#wholesale">WHOLESALE</a>
@@ -96,14 +99,14 @@ const HomePage = () => `
       </div>
       <div class="cocktail-grid">
         ${cocktails.filter(c => c.bestseller).map((cocktail, i) => `
-          <div class="cocktail-card reveal" style="animation-delay: ${0.1 * (i + 1)}s">
+          <a class="cocktail-card reveal" href="#cocktail/${cocktail.id}" style="animation-delay: ${0.1 * (i + 1)}s">
             <div class="card-square" style="background-color: ${cocktail.color}">
               <div class="bestseller-badge">
                 <span class="star">★</span> BESTSELLER
               </div>
               <img src="${cocktail.image}" alt="${cocktail.name}" loading="lazy">
               <div class="card-overlay">
-                <a href="#cocktails" class="btn-view-flavor">View Details</a>
+                <span class="btn-view-flavor">View Details</span>
               </div>
             </div>
             <div class="card-info">
@@ -114,7 +117,7 @@ const HomePage = () => `
                 <span>${cocktail.spirit}</span>
               </div>
             </div>
-          </div>
+          </a>
         `).join('')}
       </div>
       <div style="text-align: center; margin-top: 60px;">
@@ -184,18 +187,94 @@ const filterGroups = [
 
 const findFilter = (id) => filterGroups.flatMap(g => g.options).find(o => o.id === id) || null;
 
+// "OUR COCKTAILS" mega-menu: tabs on the left, image tiles on the right (built from the cocktail data)
+const megaMenuGroups = () => {
+  const bestsellers = cocktails.filter(c => c.bestseller);
+  const filterTiles = (groupTitle) => filterGroups
+    .find(g => g.title === groupTitle).options
+    .map(option => ({ label: option.label, href: `#cocktails?filter=${option.id}`, bottles: cocktails.filter(option.match) }))
+    .filter(tile => tile.bottles.length);
+  const featured = ['margarita', 'passion-fruit-martini', 'pina-colada']
+    .map(id => cocktails.find(c => c.id === id))
+    .filter(Boolean);
+
+  return [
+    {
+      key: 'bestsellers', title: 'Bestsellers', color: '#ffd042',
+      tiles: [
+        ...featured.map(c => ({ label: c.name, href: `#cocktail/${c.id}`, bottles: [c] })),
+        { label: 'All bestsellers', href: '#cocktails?filter=bestsellers', bottles: bestsellers }
+      ]
+    },
+    { key: 'taste', title: 'Taste Profile', color: '#e5ea32', tiles: filterTiles('Taste Profile') },
+    { key: 'spirit', title: 'Spirit Type', color: '#ff595b', tiles: filterTiles('Spirit Type') },
+    {
+      key: 'format', title: 'Format & Serve', color: '#20c0ff',
+      tiles: [
+        ...filterTiles('Format & Serve'),
+        { label: 'Wholesale & events', href: '#wholesale', bottles: bestsellers, background: 'var(--color-forest)' }
+      ]
+    }
+  ];
+};
+
+const megaTile = (tile) => {
+  const bottles = tile.bottles.slice(0, 3);
+  const background = tile.background
+    || (bottles.length === 1 ? bottles[0].color : `linear-gradient(135deg, ${bottles.map(b => b.color).join(', ')})`);
+  return `
+    <a class="mega-tile" href="${tile.href}">
+      <span class="mega-tile-visual mega-tile-visual--${bottles.length}" style="background: ${background}">
+        ${bottles.map(b => `<img src="${b.image}" alt="" loading="lazy">`).join('')}
+      </span>
+      <span class="mega-tile-label">${tile.label}</span>
+    </a>
+  `;
+};
+
+const MegaMenu = () => {
+  const groups = megaMenuGroups();
+  return `
+    <div class="mega-menu" id="mega-menu" style="--mega-bg: ${groups[0].color}" hidden>
+      <div class="container mega-menu-inner">
+        <div class="mega-sidebar">
+          <div class="mega-tabs" role="tablist" aria-label="Browse cocktails">
+            ${groups.map((g, i) => `
+              <button type="button" role="tab" class="mega-tab ${i === 0 ? 'active' : ''}" id="mega-tab-${g.key}"
+                aria-selected="${i === 0}" aria-controls="mega-panel-${g.key}" data-mega-tab="${g.key}" data-mega-color="${g.color}">${g.title}</button>
+            `).join('')}
+          </div>
+          <a href="#cocktails" class="mega-all">All cocktails <span aria-hidden="true">→</span></a>
+        </div>
+        ${groups.map((g, i) => `
+          <div class="mega-panel" role="tabpanel" id="mega-panel-${g.key}" aria-labelledby="mega-tab-${g.key}" ${i === 0 ? '' : 'hidden'}>
+            ${g.tiles.map(megaTile).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+};
+
 const CocktailsPage = () => {
   const activeFilter = findFilter(currentFilter);
   const filteredCocktails = activeFilter ? cocktails.filter(activeFilter.match) : cocktails;
 
-  return `
-  <section class="section-padding" style="background: var(--color-cream); margin-top: 130px;">
-    <div class="container">
-      <div class="section-header reveal">
-        <h1>Our Cocktails</h1>
-        <p>Explore our range of over 13 delicious ready-to-drink cocktails.</p>
-      </div>
+  const bannerBottles = cocktails.filter(c => c.bestseller).slice(0, 3);
 
+  return `
+  <section class="cocktails-banner">
+    <div class="container cocktails-banner-inner">
+      <h1><span>Our</span> <span>Cocktails</span></h1>
+      <p>Explore our range of over 13 delicious ready-to-drink cocktails.</p>
+    </div>
+    <div class="cocktails-banner-bottles" aria-hidden="true">
+      ${bannerBottles.map(c => `<img src="${c.image}" alt="">`).join('')}
+    </div>
+  </section>
+
+  <section class="section-padding cocktails-range" style="background: var(--color-cream);">
+    <div class="container">
       <div class="cocktail-filter">
         <div class="filter-row">
           <button type="button" class="filter-toggle" aria-expanded="false" aria-controls="filter-panel">
@@ -230,23 +309,152 @@ const CocktailsPage = () => {
       ${filteredCocktails.length === 0 ? '<p class="filter-empty">No cocktails match this filter yet.</p>' : ''}
 
       <div class="cocktail-grid">
-        ${filteredCocktails.map((cocktail, i) => `
-          <div class="cocktail-card reveal" style="animation-delay: ${0.05 * i}s">
-            <div class="card-square" style="background-color: ${cocktail.color}">
-              ${cocktail.bestseller ? `
-              <div class="bestseller-badge">
-                <span class="star">★</span> BESTSELLER
-              </div>` : ''}
-              <img src="${cocktail.image}" alt="${cocktail.name}" loading="lazy">
-            </div>
-            <div class="card-info">
-              <h3>${cocktail.name}</h3>
-              <p>${cocktail.taste}</p>
-              <p>${cocktail.spirit}</p>
-              <p>${cocktail.format}</p>
-            </div>
+        ${filteredCocktails.map(cocktailCard).join('')}
+      </div>
+    </div>
+  </section>
+`;
+};
+
+// One cocktail card (Our Cocktails grid and "Discover more"); links to the cocktail's page
+const cocktailCard = (cocktail, i) => `
+  <a class="cocktail-card reveal" href="#cocktail/${cocktail.id}" style="animation-delay: ${0.05 * i}s">
+    <div class="card-square" style="background-color: ${cocktail.color}">
+      ${cocktail.bestseller ? `
+      <div class="bestseller-badge">
+        <span class="star">★</span> BESTSELLER
+      </div>` : ''}
+      <img src="${cocktail.image}" alt="${cocktail.name}" loading="lazy">
+    </div>
+    <div class="card-info">
+      <h3>${cocktail.name}</h3>
+      <p>${cocktail.taste}</p>
+      <p>${cocktail.spirit}</p>
+      <p>${cocktail.format}</p>
+    </div>
+  </a>
+`;
+
+const WHATSAPP_NUMBER = '233540422494';
+const STORAGE_NOTE = 'Unopened bottles keep indefinitely. Once opened, enjoy within a few weeks. Store in a cool, dark place and serve chilled.';
+
+// Title-case a cocktail name for sentences ("PINA COLADA" -> "Pina Colada")
+const titleCase = (name) => name.toLowerCase().replace(/\b\w/g, ch => ch.toUpperCase());
+
+// Filter id (from filterGroups) that a cocktail falls under within a group, e.g. 'tropical-fruity'
+const filterIdFor = (groupTitle, cocktail) =>
+  filterGroups.find(g => g.title === groupTitle)?.options.find(o => o.match(cocktail))?.id;
+
+// Up to 4 other cocktails: same taste first, then same spirit, then bestsellers
+const relatedCocktails = (cocktail) => {
+  const others = cocktails.filter(c => c.id !== cocktail.id);
+  const ranked = [
+    ...others.filter(c => c.taste === cocktail.taste),
+    ...others.filter(c => c.spirit === cocktail.spirit),
+    ...others.filter(c => c.bestseller),
+    ...others
+  ];
+  return [...new Set(ranked)].slice(0, 4);
+};
+
+const ProductPage = (cocktail) => {
+  const details = cocktailDetails[cocktail.id] || {};
+  const name = titleCase(cocktail.name);
+  const tasteId = filterIdFor('Taste Profile', cocktail);
+  const spiritId = filterIdFor('Spirit Type', cocktail);
+  const orderMessage = encodeURIComponent(
+    `Hello Coppa Cocktails Ghana, I'd like to order ${name} (${details.volume || '0.7 L'} bottle). Please share the price and availability.`
+  );
+  const nutritionRows = details.nutrition ? [
+    ['Energy', details.nutrition.energy],
+    ['Fat', details.nutrition.fat],
+    ['Carbohydrates', details.nutrition.carbohydrates],
+    ['of which sugars', details.nutrition.sugars],
+    ['Protein', details.nutrition.protein],
+    ['Salt', details.nutrition.salt]
+  ].filter(([, value]) => value) : [];
+
+  return `
+  <section class="product-page" style="--product-color: ${cocktail.color}">
+    <div class="container">
+      <nav class="product-breadcrumb" aria-label="Breadcrumb">
+        <a href="#cocktails">Our Cocktails</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">${name}</span>
+      </nav>
+
+      <div class="product-hero">
+        <div class="product-visual">
+          ${cocktail.bestseller ? `
+          <div class="bestseller-badge">
+            <span class="star">★</span> BESTSELLER
+          </div>` : ''}
+          <img src="${cocktail.image}" alt="${name} bottle">
+        </div>
+
+        <div class="product-summary">
+          <p class="product-tags">
+            ${tasteId ? `<a href="#cocktails?filter=${tasteId}">${cocktail.taste}</a>` : cocktail.taste}
+            <span aria-hidden="true">•</span>
+            ${spiritId ? `<a href="#cocktails?filter=${spiritId}">${cocktail.spirit}</a>` : cocktail.spirit}
+          </p>
+          <h1>${cocktail.name}</h1>
+
+          <ul class="product-facts">
+            <li><strong>${details.volume || '0.7 L'}</strong><span>Bottle</span></li>
+            ${details.abv ? `<li><strong>${details.abv}</strong><span>ABV</span></li>` : ''}
+            ${details.kcal ? `<li><strong>${details.kcal}</strong><span>kcal / 100 ml</span></li>` : ''}
+            ${(details.dietary || []).map(tag => `<li class="product-fact-tag">${tag}</li>`).join('')}
+          </ul>
+
+          ${details.awards && details.awards.length ? `
+          <div class="product-awards">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 13.8 7 22l5-3 5 3-1.5-8.2"/><path d="m12 6 .9 1.9 2.1.3-1.5 1.4.4 2.1-1.9-1-1.9 1 .4-2.1L9 8.2l2.1-.3z"/></svg>
+            <ul>${details.awards.map(award => `<li>${award}</li>`).join('')}</ul>
+          </div>` : ''}
+
+          ${details.serve ? `
+          <div class="product-serve">
+            <h2>How to serve</h2>
+            <p>${details.serve}</p>
+          </div>` : ''}
+
+          <div class="product-actions">
+            <a class="product-btn product-btn--primary" href="https://wa.me/${WHATSAPP_NUMBER}?text=${orderMessage}" target="_blank" rel="noopener noreferrer">Order on WhatsApp</a>
+            <a class="product-btn" href="#find-us">Where to buy</a>
           </div>
-        `).join('')}
+          <p class="product-note">Ready to drink — just add ice. For adults 18+ only. Please enjoy responsibly.</p>
+        </div>
+      </div>
+
+      <div class="product-details">
+        ${details.ingredients ? `
+        <details class="product-accordion" open>
+          <summary>Ingredients</summary>
+          <p>${details.ingredients}.</p>
+        </details>` : ''}
+        ${nutritionRows.length ? `
+        <details class="product-accordion">
+          <summary>Nutritional value per 100 ml</summary>
+          <table class="nutrition-table">
+            <tbody>
+              ${nutritionRows.map(([label, value]) => `<tr><th scope="row">${label}</th><td>${value}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </details>` : ''}
+        <details class="product-accordion">
+          <summary>Storage</summary>
+          <p>${STORAGE_NOTE}</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="product-related section-padding">
+    <div class="container">
+      <h2>Discover more</h2>
+      <div class="cocktail-grid">
+        ${relatedCocktails(cocktail).map(cocktailCard).join('')}
       </div>
     </div>
   </section>
@@ -585,6 +793,7 @@ const FindUsPage = () => `
 `;
 
 let lastRoute = null;
+const DEFAULT_TITLE = document.title;
 
 const router = () => {
   // Hash may carry a query, e.g. #cocktails?filter=tropical-fruity
@@ -593,11 +802,17 @@ const router = () => {
   const filterParam = new URLSearchParams(query).get('filter');
   currentFilter = findFilter(filterParam) ? filterParam : null;
   let content = '';
+  let pageTitle = DEFAULT_TITLE;
 
   if (hash === '#') {
     content = HomePage();
   } else if (hash === '#cocktails') {
     content = CocktailsPage();
+  } else if (hash.startsWith('#cocktail/') && cocktails.some(c => c.id === hash.slice('#cocktail/'.length))) {
+    // Product page, e.g. #cocktail/mojito (only ids that exist in the data are rendered)
+    const cocktail = cocktails.find(c => c.id === hash.slice('#cocktail/'.length));
+    content = ProductPage(cocktail);
+    pageTitle = `${titleCase(cocktail.name)} | Coppa Cocktails Ghana`;
   } else if (hash === '#story') {
     content = StoryPage();
   } else if (hash === '#about') {
@@ -626,6 +841,8 @@ const router = () => {
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="35" height="35" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
     </a>
   `;
+
+  document.title = pageTitle;
 
   // Release scroll lock if the lightbox was open when navigating away (e.g. browser back)
   document.body.style.overflow = '';
@@ -682,6 +899,60 @@ const initInteractions = (routeChanged = true) => {
     window.handleParallax = handleParallax;
     window.addEventListener('scroll', window.handleParallax, { passive: true });
     window.handleParallax(); // Initial call
+  }
+
+  // "OUR COCKTAILS" mega-menu (desktop with a mouse only; elsewhere the trigger is a plain link)
+  const navDropdown = document.querySelector('.nav-dropdown');
+  const megaMenu = navDropdown && navDropdown.querySelector('.mega-menu');
+  if (navDropdown && megaMenu) {
+    const trigger = navDropdown.querySelector('.nav-dropdown-trigger');
+    const desktopPointer = window.matchMedia('(hover: hover) and (min-width: 1024px)');
+    let closeTimer;
+    const openMenu = () => {
+      if (!desktopPointer.matches) return;
+      clearTimeout(closeTimer);
+      megaMenu.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+    };
+    const closeMenu = () => {
+      clearTimeout(closeTimer);
+      megaMenu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+    };
+    // Short delay so the pointer can cross the gap between the link and the panel
+    const closeMenuSoon = () => {
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(closeMenu, 200);
+    };
+
+    navDropdown.addEventListener('mouseenter', openMenu);
+    navDropdown.addEventListener('mouseleave', closeMenuSoon);
+    navDropdown.addEventListener('focusin', openMenu);
+    navDropdown.addEventListener('focusout', (e) => {
+      if (!navDropdown.contains(e.relatedTarget)) closeMenuSoon();
+    });
+    navDropdown.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !megaMenu.hidden) {
+        closeMenu();
+        trigger.focus();
+      }
+    });
+
+    const megaTabs = navDropdown.querySelectorAll('[data-mega-tab]');
+    megaTabs.forEach(tab => {
+      const activate = () => {
+        megaTabs.forEach(t => {
+          const selected = t === tab;
+          t.classList.toggle('active', selected);
+          t.setAttribute('aria-selected', String(selected));
+          document.getElementById(`mega-panel-${t.dataset.megaTab}`).hidden = !selected;
+        });
+        megaMenu.style.setProperty('--mega-bg', tab.dataset.megaColor);
+      };
+      tab.addEventListener('mouseenter', activate);
+      tab.addEventListener('focus', activate);
+      tab.addEventListener('click', activate);
+    });
   }
 
   // Cocktail filter: FILTER button opens the panel; choosing an option updates the URL,
