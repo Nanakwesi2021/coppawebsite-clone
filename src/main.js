@@ -3,43 +3,63 @@ import { cocktails, cocktailDetails, story, about, stockists, galleryImages, cop
 
 const app = document.querySelector('#app');
 
-// ----- The Coppa Box (mixed box sold as one item) -----
+// ----- The Coppa Box: a mixed box, or a full box of one flavour -----
 const BOX_MAX_QUANTITY = 50;
 const formatCedis = (amount) => `GH₵${amount.toLocaleString('en-US')}`;
 const boxCocktails = () => coppaBox.cocktailIds.map(id => cocktails.find(c => c.id === id)).filter(Boolean);
 const clampBoxQuantity = (value) => Math.min(BOX_MAX_QUANTITY, Math.max(1, Math.floor(Number(value)) || 1));
+// Unknown ids fall back to the mixed box / no flavour, so values from the URL are never used directly
+const boxOption = (id) => coppaBox.options.find(o => o.id === id) || coppaBox.options[0];
+const boxFlavour = (id) => boxCocktails().find(c => c.id === id) || null;
+// "GH₵950" when both boxes cost the same, otherwise "From GH₵…"
+const boxPriceLabel = () => {
+  const prices = coppaBox.options.map(o => o.price);
+  const lowest = Math.min(...prices);
+  return prices.every(price => price === lowest) ? formatCedis(lowest) : `From ${formatCedis(lowest)}`;
+};
+const boxOptionText = (option) => option.id === 'single'
+  ? `${coppaBox.bottlesPerBox} bottles of the cocktail you choose`
+  : `${coppaBox.bottlesPerBox} bottles mixed from our ${boxCocktails().length} cocktails`;
+// e.g. "Mixed box" or "Full box of Mojito"
+const boxChoiceLabel = (option, flavour) => (option.id === 'single' && flavour) ? `Full box of ${titleCase(flavour.name)}` : option.name;
+const boxBadgeText = (option, flavour) => {
+  if (option.id !== 'single') return `Mixed box · ${boxCocktails().length} flavours`;
+  return flavour ? `${titleCase(flavour.name)} × ${coppaBox.bottlesPerBox}` : 'Single flavour · choose below';
+};
+// The bottles in the picture: the mixed line-up, or the chosen flavour repeated
+const boxBottlesFor = (flavour) => flavour ? Array(coppaBox.bottlesPerBox).fill(flavour) : boxCocktails();
+// A single-flavour box takes that cocktail's colour; the mixed box keeps the sunset gradient
+const boxBackground = (flavour) => flavour
+  ? `linear-gradient(160deg, color-mix(in srgb, ${flavour.color} 38%, #fff) 0%, ${flavour.color} 100%)`
+  : '';
 
-// The box's bottles fanned out (middle bottle in front). stacked = two rows (4 behind, 3 in front) for square frames
-const BoxBottles = ({ stacked = false } = {}) => {
-  const bottles = boxCocktails();
-  const fan = (row, delayStart = 0) => {
-    const middle = (row.length - 1) / 2;
-    return row.map((c, i) => {
-      const offset = i - middle;
-      return `<img src="${c.image}" alt="" style="--tilt: ${offset * (stacked ? 4 : 5)}deg; --drop: ${Math.abs(offset) * (stacked ? 3 : 5)}%; --delay: ${(delayStart + i) * 0.08}s; z-index: ${10 - Math.ceil(Math.abs(offset))}">`;
-    }).join('');
-  };
-  if (!stacked) return `<div class="box-bottles" aria-hidden="true">${fan(bottles)}</div>`;
-  const back = bottles.slice(0, Math.ceil(bottles.length / 2) + (bottles.length % 2 ? 0 : 1));
-  const front = bottles.slice(back.length);
+// The box's bottles side by side in a gentle fan (middle bottle in front).
+// Hovering one bottle lifts it to the front and makes it wave.
+const BoxBottles = (bottles = boxCocktails(), entering = false) => {
+  const middle = (bottles.length - 1) / 2;
   return `
-    <div class="box-bottles box-bottles--stacked" aria-hidden="true">
-      <div class="box-row box-row--back">${fan(back)}</div>
-      <div class="box-row box-row--front">${fan(front, back.length)}</div>
+    <div class="box-bottles${entering ? ' box-bottles--enter' : ''}" aria-hidden="true">
+      ${bottles.map((c, i) => {
+        const offset = i - middle;
+        return `<span class="box-bottle" style="--tilt: ${offset * 5}deg; --drop: ${Math.abs(offset) * 4}%; --z: ${10 - Math.abs(offset)}"><img src="${c.image}" alt=""></span>`;
+      }).join('')}
     </div>
   `;
 };
 
-// Home page promo for the box: price shown above the order button
+// Home page promo for the box: price shown above the order buttons
 const BoxPromo = () => `
   <section class="box-promo">
     <div class="container box-promo-inner">
       <div class="box-promo-copy reveal">
         <span class="tag">Order online</span>
         <h2>${coppaBox.name}</h2>
-        <p>Seven Coppa cocktails in one box: ${boxCocktails().map(c => titleCase(c.name)).join(', ')}.</p>
-        <p class="box-price"><span>Box price</span>${formatCedis(coppaBox.price)}</p>
-        <a href="#box" class="product-btn product-btn--primary">Order the box</a>
+        <p>${coppaBox.bottlesPerBox} bottles in every box. Get a mix of our cocktails (${boxCocktails().map(c => titleCase(c.name)).join(', ')}) or fill the whole box with your favourite.</p>
+        <p class="box-price"><span>Price per box</span>${boxPriceLabel()}</p>
+        <div class="box-promo-actions">
+          <a href="#box" class="product-btn product-btn--primary">Order a mixed box</a>
+          <a href="#box?type=single" class="product-btn">Choose one flavour</a>
+        </div>
       </div>
       <a href="#box" class="box-visual box-promo-visual" aria-label="Order ${coppaBox.name}">
         ${BoxBottles()}
@@ -48,8 +68,14 @@ const BoxPromo = () => `
   </section>
 `;
 
-const BoxPage = () => {
+// Order page. #box opens on the mixed box, #box?type=single on the flavour choice
+// and #box?flavour=mojito on a full box of that cocktail.
+const BoxPage = ({ type, flavour: flavourId } = {}) => {
   const bottles = boxCocktails();
+  const flavour = boxFlavour(flavourId);
+  const selected = boxOption(flavour ? 'single' : type);
+  const isSingle = selected.id === 'single';
+  const shown = isSingle ? flavour : null;
   return `
   <section class="product-page box-page">
     <div class="container">
@@ -60,30 +86,60 @@ const BoxPage = () => {
       </nav>
 
       <div class="product-hero">
-        <div class="box-visual box-page-visual">
-          ${BoxBottles({ stacked: true })}
+        <div class="box-visual box-page-visual" data-box-visual data-shown="${shown ? shown.id : 'mixed'}"${shown ? ` style="--box-bg: ${boxBackground(shown)}"` : ''}>
+          <span class="box-visual-badge" data-box-badge>${boxBadgeText(selected, shown)}</span>
+          ${BoxBottles(boxBottlesFor(shown))}
         </div>
 
         <div class="product-summary">
-          <p class="product-tags">Mixed box <span aria-hidden="true">•</span> ${bottles.length} cocktails</p>
+          <p class="product-tags">${coppaBox.bottlesPerBox} bottles <span aria-hidden="true">•</span> Mixed or one flavour</p>
           <h1>${coppaBox.name}</h1>
-          <p class="box-price box-price--large"><span>Price per box</span>${formatCedis(coppaBox.price)}</p>
-          <p class="box-lead">Seven of our cocktails in one box. Chill, add ice and pour.</p>
-
-          <h2 class="box-subheading">What's in the box</h2>
-          <ul class="box-contents">
-            ${bottles.map(c => `
-              <li>
-                <a href="#cocktail/${c.id}" style="--item-color: ${c.color}">
-                  <img src="${c.image}" alt="" loading="lazy">
-                  <span><strong>${titleCase(c.name)}</strong>${c.taste}</span>
-                </a>
-              </li>
-            `).join('')}
-          </ul>
+          <p class="box-price box-price--large"><span>Price per box</span><strong data-box-price>${formatCedis(selected.price)}</strong></p>
+          <p class="box-lead">${coppaBox.bottlesPerBox} bottles in every box. Get a mix of the ${bottles.length} cocktails below, or fill the box with the one you love most. Chill, add ice and pour.</p>
 
           <form class="premium-form box-order-form" id="box-order-form">
-            <h2 class="box-subheading">Place your order</h2>
+            <fieldset class="box-step">
+              <legend class="box-subheading">Choose your box</legend>
+              <div class="box-options">
+                ${coppaBox.options.map(option => `
+                  <label class="box-option">
+                    <input type="radio" name="boxType" value="${option.id}"${option.id === selected.id ? ' checked' : ''}>
+                    <span class="box-option-text">
+                      <strong>${option.name}</strong>
+                      <span>${boxOptionText(option)}</span>
+                    </span>
+                    <span class="box-option-price">${formatCedis(option.price)}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </fieldset>
+
+            <div class="box-step" data-box-panel="mixed"${isSingle ? ' hidden' : ''}>
+              <p class="box-step-title">Your mix of ${coppaBox.bottlesPerBox} comes from</p>
+              <ul class="box-contents">
+                ${bottles.map(c => `
+                  <li>
+                    <a href="#cocktail/${c.id}" style="--item-color: ${c.color}">
+                      <img src="${c.image}" alt="" loading="lazy">
+                      <span><strong>${titleCase(c.name)}</strong>${c.taste}</span>
+                    </a>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <fieldset class="box-step" data-box-panel="single"${isSingle ? '' : ' hidden disabled'}>
+              <legend class="box-step-title">Choose your flavour</legend>
+              <div class="box-flavours">
+                ${bottles.map(c => `
+                  <label class="box-flavour" style="--item-color: ${c.color}">
+                    <input type="radio" name="flavour" value="${c.id}" required${shown && shown.id === c.id ? ' checked' : ''}>
+                    <span class="box-flavour-art"><img src="${c.image}" alt="" loading="lazy"></span>
+                    <span class="box-flavour-name">${titleCase(c.name)}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </fieldset>
 
             <div class="form-group">
               <label for="box-quantity">NUMBER OF BOXES</label>
@@ -93,6 +149,8 @@ const BoxPage = () => {
                 <button type="button" data-qty-step="1" aria-label="One box more">+</button>
               </div>
             </div>
+
+            <h2 class="box-subheading">Your details</h2>
 
             <div class="form-row">
               <div class="form-group">
@@ -127,8 +185,8 @@ const BoxPage = () => {
             </label>
 
             <div class="box-total" aria-live="polite">
-              <span>Total</span>
-              <strong data-box-total>${formatCedis(coppaBox.price)}</strong>
+              <span class="box-total-label">Total<small data-box-summary>1 × ${boxChoiceLabel(selected, shown)}</small></span>
+              <strong data-box-total>${formatCedis(selected.price)}</strong>
             </div>
 
             <button type="submit" class="btn-submit-premium">
@@ -184,7 +242,7 @@ const Header = () => {
         <div class="nav-panel-footer">
           <a href="#box" class="nav-panel-cta">
             <span>Order ${coppaBox.name}</span>
-            <strong>${formatCedis(coppaBox.price)}</strong>
+            <strong>${boxPriceLabel()}</strong>
           </a>
           <div class="nav-panel-contact">
             <a href="https://wa.me/${WHATSAPP_NUMBER}" target="_blank" rel="noopener noreferrer">WhatsApp +233 54 042 2494</a>
@@ -242,6 +300,9 @@ const HomePage = () => `
       <img src="/images/slide1.jpg" alt="Cocktail Experience 1" class="hero-slide">
       <img src="/images/slide3.jpg" alt="Cocktail Experience 2" class="hero-slide">
       <img src="/images/celebrate-life2.jpg" alt="Cocktail Experience 3" class="hero-slide">
+      <div class="hero-slide hero-slide--box" aria-hidden="true">
+        ${BoxBottles()}
+      </div>
     </div>
     <div class="container hero-content-left">
       <h1 class="hero-title reveal">WORLD'S BEST<br>READY TO<br>DRINK<br>COCKTAILS</h1>
@@ -250,7 +311,8 @@ const HomePage = () => `
       </div>
     </div>
     <div class="slider-indicator reveal" style="animation-delay: 0.6s">
-      <span class="active"></span>
+      <span></span>
+      <span></span>
       <span></span>
       <span></span>
     </div>
@@ -387,7 +449,7 @@ const megaMenuGroups = () => {
       key: 'format', title: 'Format & Serve', color: '#20c0ff',
       tiles: [
         ...filterTiles('Format & Serve'),
-        { label: `${coppaBox.name} · ${formatCedis(coppaBox.price)}`, href: '#box', bottles: boxCocktails() },
+        { label: `${coppaBox.name} · ${boxPriceLabel()}`, href: '#box', bottles: boxCocktails() },
         { label: 'Wholesale & events', href: '#wholesale', bottles: bestsellers, background: 'var(--color-forest)' }
       ]
     }
@@ -600,8 +662,8 @@ const ProductPage = (cocktail) => {
             <a class="product-btn" href="#find-us">Where to buy</a>
           </div>
           ${coppaBox.cocktailIds.includes(cocktail.id) ? `
-          <a class="product-box-callout" href="#box">
-            <span>Also in <strong>${coppaBox.name}</strong>: ${coppaBox.cocktailIds.length} cocktails for ${formatCedis(coppaBox.price)}</span>
+          <a class="product-box-callout" href="#box?flavour=${cocktail.id}">
+            <span><strong>Order a full box of ${titleCase(cocktail.name)}</strong>: ${coppaBox.bottlesPerBox} bottles for ${formatCedis(boxOption('single').price)}</span>
             <span aria-hidden="true">→</span>
           </a>` : ''}
           <p class="product-note">Ready to drink — just add ice. For adults 18+ only. Please enjoy responsibly.</p>
@@ -995,8 +1057,10 @@ const router = () => {
     content = ProductPage(cocktail);
     pageTitle = `${titleCase(cocktail.name)} | Coppa Cocktails Ghana`;
   } else if (hash === '#box') {
-    content = BoxPage();
-    pageTitle = `${coppaBox.name} (${formatCedis(coppaBox.price)}) | Coppa Cocktails Ghana`;
+    // e.g. #box?type=single or #box?flavour=mojito (BoxPage ignores unknown values)
+    const params = new URLSearchParams(query);
+    content = BoxPage({ type: params.get('type'), flavour: params.get('flavour') });
+    pageTitle = `${coppaBox.name} (${boxPriceLabel()}) | Coppa Cocktails Ghana`;
   } else if (hash === '#story') {
     content = StoryPage();
   } else if (hash === '#about') {
@@ -1344,14 +1408,46 @@ const initInteractions = (routeChanged = true) => {
     document.addEventListener('keydown', window.handleKeydown);
   }
 
-  // Coppa Box order form: quantity stepper, live total, address only needed for delivery
+  // Coppa Box order form: box type, flavour, quantity stepper, live price/total, address only needed for delivery
   const boxForm = document.getElementById('box-order-form');
   if (boxForm) {
     const quantityInput = boxForm.elements.quantity;
     const totalEl = boxForm.querySelector('[data-box-total]');
+    const summaryEl = boxForm.querySelector('[data-box-summary]');
+    const priceEl = document.querySelector('[data-box-price]');
     const addressGroup = boxForm.querySelector('[data-address-group]');
+    const mixedPanel = boxForm.querySelector('[data-box-panel="mixed"]');
+    const flavourPanel = boxForm.querySelector('[data-box-panel="single"]');
+    const flavourInputs = [...flavourPanel.querySelectorAll('input[name="flavour"]')];
+    const visual = document.querySelector('[data-box-visual]');
+    const badge = visual.querySelector('[data-box-badge]');
+
     const updateBoxForm = () => {
-      totalEl.textContent = formatCedis(clampBoxQuantity(quantityInput.value) * coppaBox.price);
+      const option = boxOption(boxForm.elements.boxType.value);
+      const single = option.id === 'single';
+      const flavour = single ? boxFlavour(flavourInputs.find(input => input.checked)?.value) : null;
+      const quantity = clampBoxQuantity(quantityInput.value);
+
+      // Mixed box lists its cocktails; single-flavour box asks for the flavour (disabled = not validated or sent)
+      mixedPanel.hidden = single;
+      flavourPanel.hidden = !single;
+      flavourPanel.disabled = !single;
+      flavourInputs[0].setCustomValidity(single && !flavour ? 'Please choose a flavour for your box.' : '');
+
+      priceEl.textContent = formatCedis(option.price);
+      totalEl.textContent = formatCedis(quantity * option.price);
+      summaryEl.textContent = `${quantity} × ${boxChoiceLabel(option, flavour)}`;
+      badge.textContent = boxBadgeText(option, flavour);
+
+      // Picture shows the mixed line-up, or the chosen flavour in its own colour
+      const shown = flavour ? flavour.id : 'mixed';
+      if (visual.dataset.shown !== shown) {
+        visual.dataset.shown = shown;
+        visual.querySelector('.box-bottles').outerHTML = BoxBottles(boxBottlesFor(flavour), true);
+        if (flavour) visual.style.setProperty('--box-bg', boxBackground(flavour));
+        else visual.style.removeProperty('--box-bg');
+      }
+
       const delivering = boxForm.elements.fulfilment.value === 'delivery';
       addressGroup.hidden = !delivering;
       boxForm.elements.address.required = delivering;
@@ -1396,13 +1492,17 @@ const initInteractions = (routeChanged = true) => {
         ];
       } else if (form.id === 'box-order-form') {
         const quantity = clampBoxQuantity(field('quantity'));
+        const option = boxOption(field('boxType'));
+        const flavour = option.id === 'single' ? boxFlavour(field('flavour')) : null;
         const delivering = form.elements.fulfilment.value === 'delivery';
         lines = [
           'Hello Coppa Cocktails Ghana, I would like to place an order.',
           '',
-          `Order: ${quantity} x ${coppaBox.name} (${formatCedis(coppaBox.price)} each)`,
-          `In each box: ${boxCocktails().map(c => titleCase(c.name)).join(', ')}`,
-          `Total: ${formatCedis(quantity * coppaBox.price)}`,
+          `Order: ${quantity} x ${coppaBox.name}, ${boxChoiceLabel(option, flavour)} (${formatCedis(option.price)} each)`,
+          flavour
+            ? `In each box: ${coppaBox.bottlesPerBox} x ${titleCase(flavour.name)}`
+            : `In each box: ${coppaBox.bottlesPerBox} bottles mixed from ${boxCocktails().map(c => titleCase(c.name)).join(', ')}`,
+          `Total: ${formatCedis(quantity * option.price)}`,
           '',
           `Name: ${field('name')}`,
           `Phone: ${field('phone')}`,
