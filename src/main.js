@@ -95,7 +95,7 @@ const HomePage = () => `
         <p>Expertly crafted, ready to serve. Discover the flavors that everyone is talking about.</p>
       </div>
       <div class="cocktail-grid">
-        ${cocktails.filter(c => c.featured !== false).map((cocktail, i) => `
+        ${cocktails.filter(c => c.bestseller).map((cocktail, i) => `
           <div class="cocktail-card reveal" style="animation-delay: ${0.1 * (i + 1)}s">
             <div class="card-square" style="background-color: ${cocktail.color}">
               <div class="bestseller-badge">
@@ -143,16 +143,50 @@ const HomePage = () => `
   </section>
 `;
 
-let currentFilter = 'All';
+// Active cocktail filter id (null = show all). Set from the URL: #cocktails?filter=<id>
+let currentFilter = null;
 let currentGalleryFilter = 'All';
 
 // StoryPage logic moved to enhanced version below
 
+const filterGroups = [
+  {
+    title: 'Taste Profile',
+    options: [
+      { id: 'tropical-fruity', label: 'Tropical & Fruity', icon: 'tropical-fruity', match: c => c.taste === 'Tropical & Fruity' },
+      { id: 'citric-fresh', label: 'Citric & Fresh', icon: 'citric-fresh', match: c => c.taste === 'Citric & Fresh' },
+      { id: 'sweet-smooth', label: 'Sweet & Smooth', icon: 'sweetsmooth', match: c => c.taste === 'Sweet & Smooth' },
+      { id: 'bold-classic', label: 'Bold & Classic', icon: 'boldclassic', match: c => c.taste === 'Bold & Classic' }
+    ]
+  },
+  {
+    title: 'Spirit Type',
+    options: [
+      { id: 'rum-based', label: 'Rum-Based', icon: 'rumbased', match: c => c.spirit === 'Rum Based' },
+      { id: 'tequila-based', label: 'Tequila-Based', icon: 'tequilabased', match: c => c.spirit === 'Tequila Based' },
+      { id: 'vodka-based', label: 'Vodka-Based', icon: 'vodkabased', match: c => c.spirit === 'Vodka Based' },
+      { id: 'other-spirits', label: 'Other Spirits', icon: 'otherspirits', match: c => c.spirit === 'Other Spirits' }
+    ]
+  },
+  {
+    title: 'Format & Serve',
+    options: [
+      { id: 'bottles', label: 'Bottles', icon: 'bottles', match: c => c.format === 'Bottle' }
+    ]
+  },
+  {
+    title: 'Bestsellers',
+    options: [
+      { id: 'bestsellers', label: 'All bestsellers', icon: 'bestsellers', match: c => c.bestseller }
+    ]
+  }
+];
+
+const findFilter = (id) => filterGroups.flatMap(g => g.options).find(o => o.id === id) || null;
 
 const CocktailsPage = () => {
-  const filteredCocktails = currentFilter === 'All' 
-    ? cocktails 
-    : cocktails.filter(c => c.spirit.toLowerCase().includes(currentFilter.toLowerCase().replace('-based', '')));
+  const activeFilter = findFilter(currentFilter);
+  const filteredCocktails = activeFilter ? cocktails.filter(activeFilter.match) : cocktails;
 
   return `
   <section class="section-padding" style="background: var(--color-cream); margin-top: 130px;">
@@ -161,22 +195,48 @@ const CocktailsPage = () => {
         <h1>Our Cocktails</h1>
         <p>Explore our range of over 13 delicious ready-to-drink cocktails.</p>
       </div>
-      
-      <div class="filter-bar reveal">
-        <button class="filter-btn ${currentFilter === 'All' ? 'active' : ''}" data-filter="All">All</button>
-        <button class="filter-btn ${currentFilter === 'Rum-Based' ? 'active' : ''}" data-filter="Rum-Based">Rum-Based</button>
-        <button class="filter-btn ${currentFilter === 'Tequila-Based' ? 'active' : ''}" data-filter="Tequila-Based">Tequila-Based</button>
-        <button class="filter-btn ${currentFilter === 'Vodka-Based' ? 'active' : ''}" data-filter="Vodka-Based">Vodka-Based</button>
-        <button class="filter-btn ${currentFilter === 'Other Spirits' ? 'active' : ''}" data-filter="Other Spirits">Other Spirits</button>
+
+      <div class="cocktail-filter">
+        <div class="filter-row">
+          <button type="button" class="filter-toggle" aria-expanded="false" aria-controls="filter-panel">
+            <img src="/filter-icons/filter.svg" alt="" width="18" height="18">
+            <span>FILTER</span>
+          </button>
+          <div class="filter-chips">
+            ${activeFilter ? `
+              <button type="button" class="filter-chip" data-filter-clear aria-label="Remove filter: ${activeFilter.label}">
+                <img src="/filter-icons/cross.svg" alt="" width="12" height="12">
+                ${activeFilter.label}
+              </button>
+            ` : ''}
+          </div>
+        </div>
+
+        <div class="filter-panel" id="filter-panel" hidden>
+          ${filterGroups.map(group => `
+            <div class="filter-group">
+              <h2>${group.title}</h2>
+              ${group.options.map(option => `
+                <button type="button" class="filter-option ${option.id === currentFilter ? 'active' : ''}" data-filter-id="${option.id}" aria-pressed="${option.id === currentFilter}">
+                  <img src="/filter-icons/${option.icon}.svg" alt="" width="28" height="28">
+                  <span>${option.label}</span>
+                </button>
+              `).join('')}
+            </div>
+          `).join('')}
+        </div>
       </div>
+
+      ${filteredCocktails.length === 0 ? '<p class="filter-empty">No cocktails match this filter yet.</p>' : ''}
 
       <div class="cocktail-grid">
         ${filteredCocktails.map((cocktail, i) => `
           <div class="cocktail-card reveal" style="animation-delay: ${0.05 * i}s">
             <div class="card-square" style="background-color: ${cocktail.color}">
+              ${cocktail.bestseller ? `
               <div class="bestseller-badge">
                 <span class="star">★</span> BESTSELLER
-              </div>
+              </div>` : ''}
               <img src="${cocktail.image}" alt="${cocktail.name}" loading="lazy">
             </div>
             <div class="card-info">
@@ -524,8 +584,14 @@ const FindUsPage = () => `
   </section>
 `;
 
+let lastRoute = null;
+
 const router = () => {
-  const hash = window.location.hash || '#';
+  // Hash may carry a query, e.g. #cocktails?filter=tropical-fruity
+  const [route, query = ''] = (window.location.hash || '#').split('?');
+  const hash = route || '#';
+  const filterParam = new URLSearchParams(query).get('filter');
+  currentFilter = findFilter(filterParam) ? filterParam : null;
   let content = '';
 
   if (hash === '#') {
@@ -564,10 +630,14 @@ const router = () => {
   // Release scroll lock if the lightbox was open when navigating away (e.g. browser back)
   document.body.style.overflow = '';
 
-  initInteractions();
+  // Only jump to the top when moving to a different page, not when changing a filter
+  const routeChanged = hash !== lastRoute;
+  lastRoute = hash;
+
+  initInteractions(routeChanged);
 };
 
-const initInteractions = () => {
+const initInteractions = (routeChanged = true) => {
   // Intersection Observer for reveal animations
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -614,14 +684,38 @@ const initInteractions = () => {
     window.handleParallax(); // Initial call
   }
 
-  // Handle Filtering
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      currentFilter = e.target.dataset.filter;
-      router();
+  // Cocktail filter: FILTER button opens the panel; choosing an option updates the URL,
+  // which re-renders the page through the router. Choosing the active option clears it.
+  const setFilter = (id) => {
+    window.location.hash = id ? `#cocktails?filter=${encodeURIComponent(id)}` : '#cocktails';
+  };
+
+  document.querySelectorAll('[data-filter-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setFilter(btn.dataset.filterId === currentFilter ? null : btn.dataset.filterId);
     });
   });
+
+  document.querySelectorAll('[data-filter-clear]').forEach(btn => {
+    btn.addEventListener('click', () => setFilter(null));
+  });
+
+  const filterToggle = document.querySelector('.filter-toggle');
+  const filterPanel = document.getElementById('filter-panel');
+  if (filterToggle && filterPanel) {
+    const setPanelOpen = (open) => {
+      filterPanel.hidden = !open;
+      filterToggle.setAttribute('aria-expanded', String(open));
+      filterToggle.classList.toggle('is-open', open);
+    };
+    filterToggle.addEventListener('click', () => setPanelOpen(filterPanel.hidden));
+    filterToggle.closest('.cocktail-filter').addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !filterPanel.hidden) {
+        setPanelOpen(false);
+        filterToggle.focus();
+      }
+    });
+  }
 
   // Gallery lightbox
   const galleryItems = document.querySelectorAll('.gallery-item');
@@ -822,8 +916,21 @@ const initInteractions = () => {
     });
   });
 
-  window.scrollTo(0, 0);
+  if (routeChanged) window.scrollTo(0, 0);
 };
+
+// Close the cocktail filter panel when clicking anywhere outside it
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('filter-panel');
+  if (panel && !panel.hidden && !e.target.closest('.cocktail-filter')) {
+    panel.hidden = true;
+    const toggle = document.querySelector('.filter-toggle');
+    if (toggle) {
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.classList.remove('is-open');
+    }
+  }
+});
 
 window.addEventListener('hashchange', router);
 router();
