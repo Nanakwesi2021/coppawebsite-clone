@@ -5,7 +5,7 @@ export const cocktails = [
     taste: 'Citric & Fresh',
     spirit: 'Rum Based',
     format: 'Bottle',
-    image: 'https://www.coppacocktails.com/our-cocktails/products/mojito.png',
+    image: '/products/mojito.png',
     color: '#76b82a'
   },
   {
@@ -14,7 +14,7 @@ export const cocktails = [
     taste: 'Tropical & Fruity',
     spirit: 'Vodka Based',
     format: 'Bottle',
-    image: 'https://www.coppacocktails.com/our-cocktails/products/sex-on-the-beach.png',
+    image: '/products/sex-on-the-beach.png',
     color: '#ff6b6b'
   },
   {
@@ -23,7 +23,7 @@ export const cocktails = [
     taste: 'Citric & Fresh',
     spirit: 'Tequila Based',
     format: 'Bottle',
-    image: 'https://www.coppacocktails.com/our-cocktails/products/tequila-sunrise.png',
+    image: '/products/tequila-sunrise.png',
     color: '#f39c12'
   },
   {
@@ -32,7 +32,7 @@ export const cocktails = [
     taste: 'Tropical & Fruity',
     spirit: 'Rum Based',
     format: 'Bottle',
-    image: 'https://www.coppacocktails.com/our-cocktails/products/pina-colada.png',
+    image: '/products/pina-colada.png',
     color: '#fef9e7'
   },
   {
@@ -41,7 +41,7 @@ export const cocktails = [
     taste: 'Sweet & Smooth',
     spirit: 'Rum Based',
     format: 'Bottle',
-    image: 'https://www.coppacocktails.com/our-cocktails/products/strawberry-daiquiri.png',
+    image: '/products/strawberry-daiquiri.png',
     color: '#d63b65'
   },
   {
@@ -50,7 +50,7 @@ export const cocktails = [
     taste: 'Tropical & Fruity',
     spirit: 'Vodka Based',
     format: 'Bottle',
-    image: 'https://www.coppacocktails.com/our-cocktails/products/passion-fruit-martini.png',
+    image: '/products/passion-fruit-martini.png',
     color: '#92367d'
   },
   {
@@ -59,7 +59,7 @@ export const cocktails = [
     taste: 'Tropical & Fruity',
     spirit: 'Rum Based',
     format: 'Bottle',
-    image: 'https://www.coppacocktails.com/our-cocktails/products/mai-tai.png',
+    image: '/products/mai-tai.png',
     color: '#e67e22'
   }
 ];
@@ -81,11 +81,11 @@ export const about = {
     }
   ],
   images: [
-    'https://www.coppacocktails.com/home/celebrateLife/celebrate-life2.jpg',
-    'https://www.coppacocktails.com/home/celebrateLife/celebrate-life3.jpg',
-    'https://www.coppacocktails.com/home/slide/slide1.jpg',
-    'https://www.coppacocktails.com/our-cocktails/products/mojito.png',
-    'https://www.coppacocktails.com/our-cocktails/products/strawberry-daiquiri.png'
+    '/images/celebrate-life2.jpg',
+    '/images/celebrate-life3.jpg',
+    '/images/slide1.jpg',
+    '/products/mojito.png',
+    '/products/strawberry-daiquiri.png'
   ]
 };
 
@@ -106,11 +106,11 @@ export const story = {
     }
   ],
   images: [
-    'https://www.coppacocktails.com/home/celebrateLife/celebrate-life2.jpg',
-    'https://www.coppacocktails.com/home/celebrateLife/celebrate-life3.jpg',
-    'https://www.coppacocktails.com/home/slide/slide3.jpg',
-    'https://www.coppacocktails.com/home/slide/slide1.jpg',
-    'https://www.coppacocktails.com/our-cocktails/products/passion-fruit-martini.png'
+    '/images/celebrate-life2.jpg',
+    '/images/celebrate-life3.jpg',
+    '/images/slide3.jpg',
+    '/images/slide1.jpg',
+    '/products/passion-fruit-martini.png'
   ]
 };
 
@@ -139,14 +139,14 @@ export const stockists = [
 ];
 
 export const galleryImages = [
-  { src: 'viber/PHOTO-2026-04-13-15-32-23.jpg', label: 'Coppa Vibe', category: 'Lifestyle' },
-  { src: 'viber/PHOTO-2026-04-13-15-32-24.jpg', label: 'Celebrate Life', category: 'Lifestyle' },
-  { src: 'viber/PHOTO-2026-04-13-15-32-25.jpg', label: 'Party Vibe', category: 'Moments' },
-  { src: 'viber/PHOTO-2026-04-13-15-35-43.jpg', label: 'Night Out', category: 'Lifestyle' },
-  { src: 'viber/PHOTO-2026-04-13-15-35-44.jpg', label: 'Tropical Refreshment', category: 'Products' },
-  { src: 'viber/PHOTO-2026-04-13-15-35-45.jpg', label: 'Good Times', category: 'Moments' },
-  { src: 'viber/PHOTO-2026-04-13-15-35-46.jpg', label: 'Rooftop Chills', category: 'Travel' },
-  { src: 'viber/PHOTO-2026-04-13-15-35-47.jpg', label: 'Coppa Moments', category: 'Lifestyle' },
-  { src: 'viber/PHOTO-2026-04-13-15-35-48.jpg', label: 'Sip and Relax', category: 'Moments' },
-  { src: 'viber/PHOTO-2026-04-13-15-35-49.jpg', label: 'Unforgettable Memories', category: 'Moments' }
+  { src: '/viber/PHOTO-2026-04-13-15-32-23.jpg', label: 'Coppa Vibe', category: 'Lifestyle' },
+  { src: '/viber/PHOTO-2026-04-13-15-32-24.jpg', label: 'Celebrate Life', category: 'Lifestyle' },
+  { src: '/viber/PHOTO-2026-04-13-15-32-25.jpg', label: 'Party Vibe', category: 'Moments' },
+  { src: '/viber/PHOTO-2026-04-13-15-35-43.jpg', label: 'Night Out', category: 'Lifestyle' },
+  { src: '/viber/PHOTO-2026-04-13-15-35-44.jpg', label: 'Tropical Refreshment', category: 'Products' },
+  { src: '/viber/PHOTO-2026-04-13-15-35-45.jpg', label: 'Good Times', category: 'Moments' },
+  { src: '/viber/PHOTO-2026-04-13-15-35-46.jpg', label: 'Rooftop Chills', category: 'Travel' },
+  { src: '/viber/PHOTO-2026-04-13-15-35-47.jpg', label: 'Coppa Moments', category: 'Lifestyle' },
+  { src: '/viber/PHOTO-2026-04-13-15-35-48.jpg', label: 'Sip and Relax', category: 'Moments' },
+  { src: '/viber/PHOTO-2026-04-13-15-35-49.jpg', label: 'Unforgettable Memories', category: 'Moments' }
 ];

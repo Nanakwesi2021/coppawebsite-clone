@@ -7,7 +7,7 @@ const Header = () => `
   <header class="header">
     <div class="container header-content">
       <div class="logo">
-        <a href="#"><img src="https://www.coppacocktails.com/logo.webp" alt="Coppa Cocktails"></a>
+        <a href="#"><img src="/images/logo.webp" alt="Coppa Cocktails"></a>
       </div>
       
       <nav class="nav-menu">
@@ -27,7 +27,7 @@ const Footer = () => `
   <footer class="footer">
     <div class="container footer-content">
       <div class="footer-logo">
-        <img src="https://www.coppacocktails.com/logo.webp" alt="Coppa Cocktails" loading="lazy">
+        <img src="/images/logo.webp" alt="Coppa Cocktails" loading="lazy">
       </div>
       <div class="footer-links">
         <div class="footer-col">
@@ -63,9 +63,9 @@ const Footer = () => `
 const HomePage = () => `
   <section class="hero">
     <div class="hero-bg">
-      <img src="https://www.coppacocktails.com/home/slide/slide1.jpg" alt="Cocktail Experience 1" class="hero-slide">
-      <img src="https://www.coppacocktails.com/home/slide/slide3.jpg" alt="Cocktail Experience 2" class="hero-slide">
-      <img src="https://www.coppacocktails.com/home/celebrateLife/celebrate-life2.jpg" alt="Cocktail Experience 3" class="hero-slide">
+      <img src="/images/slide1.jpg" alt="Cocktail Experience 1" class="hero-slide">
+      <img src="/images/slide3.jpg" alt="Cocktail Experience 2" class="hero-slide">
+      <img src="/images/celebrate-life2.jpg" alt="Cocktail Experience 3" class="hero-slide">
     </div>
     <div class="container hero-content-left">
       <h1 class="hero-title reveal">WORLD'S BEST<br>READY TO<br>DRINK<br>COCKTAILS</h1>
@@ -233,7 +233,7 @@ const ContactPage = () => `
               <textarea name="message" placeholder="How can we help you?" rows="5" required></textarea>
             </div>
             <button type="submit" class="btn-submit-premium" style="width: 100%;">
-              <span>SEND MESSAGE</span>
+              <span>SEND VIA WHATSAPP</span>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
             </button>
           </form>
@@ -253,7 +253,7 @@ const ContactPage = () => `
 
 const WholesalePage = () => `
   <section class="wholesale-hero">
-    <div class="wholesale-hero-bg" style="background-image: url('https://www.coppacocktails.com/home/slide/slide3.jpg')"></div>
+    <div class="wholesale-hero-bg" style="background-image: url('/images/slide3.jpg')"></div>
     <div class="wholesale-hero-content container">
       <h1 class="reveal">Partner With Us</h1>
       <p class="reveal" style="animation-delay: 0.2s">Bring the world's best cocktails to your venue.</p>
@@ -310,7 +310,7 @@ const WholesalePage = () => `
               <textarea name="message" placeholder="Tell us about your business needs..." rows="4" required></textarea>
             </div>
             <button type="submit" class="btn-submit-premium">
-              <span>SUBMIT ENQUIRY</span>
+              <span>SUBMIT ENQUIRY VIA WHATSAPP</span>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
             </button>
           </form>
@@ -335,7 +335,7 @@ const LegalPage = (title) => `
 
 const AboutPage = () => `
   <section class="about-hero">
-    <div class="about-hero-bg" style="background-image: url('https://www.coppacocktails.com/home/slide/slide1.jpg')"></div>
+    <div class="about-hero-bg" style="background-image: url('/images/slide1.jpg')"></div>
     <div class="about-hero-content container">
       <h1 class="reveal">${about.title}</h1>
       <p class="reveal" style="animation-delay: 0.2s">The world's best ready-to-serve cocktails.</p>
@@ -387,7 +387,7 @@ const StoryPage = () => {
   <section class="gallery-page" style="margin-top: 130px; background: #0a0a0a; min-height: 100vh; padding-bottom: 120px;">
     <div class="gallery-hero reveal">
       <div class="gallery-hero-overlay"></div>
-      <img src="https://www.coppacocktails.com/home/celebrateLife/celebrate-life3.jpg" alt="Coppa Vibe" class="gallery-hero-bg">
+      <img src="/images/celebrate-life3.jpg" alt="Coppa Vibe" class="gallery-hero-bg">
       <div class="gallery-hero-content">
         <span class="gallery-tag">THE COPPA VIBE</span>
         <h1 class="gallery-hero-title">Life's Better<br>With Coppa</h1>
