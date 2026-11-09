@@ -95,7 +95,7 @@ const HomePage = () => `
         <p>Expertly crafted, ready to serve. Discover the flavors that everyone is talking about.</p>
       </div>
       <div class="cocktail-grid">
-        ${cocktails.map((cocktail, i) => `
+        ${cocktails.filter(c => c.featured !== false).map((cocktail, i) => `
           <div class="cocktail-card reveal" style="animation-delay: ${0.1 * (i + 1)}s">
             <div class="card-square" style="background-color: ${cocktail.color}">
               <div class="bestseller-badge">
@@ -159,7 +159,7 @@ const CocktailsPage = () => {
     <div class="container">
       <div class="section-header reveal">
         <h1>Our Cocktails</h1>
-        <p>Explore our range of over 7 delicious ready-to-drink cocktails.</p>
+        <p>Explore our range of over 13 delicious ready-to-drink cocktails.</p>
       </div>
       
       <div class="filter-bar reveal">
@@ -167,6 +167,7 @@ const CocktailsPage = () => {
         <button class="filter-btn ${currentFilter === 'Rum-Based' ? 'active' : ''}" data-filter="Rum-Based">Rum-Based</button>
         <button class="filter-btn ${currentFilter === 'Tequila-Based' ? 'active' : ''}" data-filter="Tequila-Based">Tequila-Based</button>
         <button class="filter-btn ${currentFilter === 'Vodka-Based' ? 'active' : ''}" data-filter="Vodka-Based">Vodka-Based</button>
+        <button class="filter-btn ${currentFilter === 'Other Spirits' ? 'active' : ''}" data-filter="Other Spirits">Other Spirits</button>
       </div>
 
       <div class="cocktail-grid">

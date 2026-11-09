@@ -6,7 +6,7 @@ export const cocktails = [
     spirit: 'Rum Based',
     format: 'Bottle',
     image: '/products/mojito.png',
-    color: '#76b82a'
+    color: '#84b525'
   },
   {
     id: 'sex-on-the-beach',
@@ -15,7 +15,7 @@ export const cocktails = [
     spirit: 'Vodka Based',
     format: 'Bottle',
     image: '/products/sex-on-the-beach.png',
-    color: '#ff6b6b'
+    color: '#eb7a3a'
   },
   {
     id: 'tequila-sunrise',
@@ -24,7 +24,7 @@ export const cocktails = [
     spirit: 'Tequila Based',
     format: 'Bottle',
     image: '/products/tequila-sunrise.png',
-    color: '#f39c12'
+    color: '#f7b967'
   },
   {
     id: 'pina-colada',
@@ -33,7 +33,7 @@ export const cocktails = [
     spirit: 'Rum Based',
     format: 'Bottle',
     image: '/products/pina-colada.png',
-    color: '#fef9e7'
+    color: '#2e96dc'
   },
   {
     id: 'strawberry-daiquiri',
@@ -42,7 +42,7 @@ export const cocktails = [
     spirit: 'Rum Based',
     format: 'Bottle',
     image: '/products/strawberry-daiquiri.png',
-    color: '#d63b65'
+    color: '#da3e6f'
   },
   {
     id: 'passion-fruit-martini',
@@ -51,7 +51,7 @@ export const cocktails = [
     spirit: 'Vodka Based',
     format: 'Bottle',
     image: '/products/passion-fruit-martini.png',
-    color: '#92367d'
+    color: '#a13c84'
   },
   {
     id: 'mai-tai',
@@ -60,7 +60,68 @@ export const cocktails = [
     spirit: 'Rum Based',
     format: 'Bottle',
     image: '/products/mai-tai.png',
-    color: '#e67e22'
+    color: '#f05f0f'
+  },
+  // featured: false keeps these off the home page "Our Bestsellers" grid
+  {
+    id: 'margarita',
+    name: 'MARGARITA',
+    taste: 'Citric & Fresh',
+    spirit: 'Tequila Based',
+    format: 'Bottle',
+    image: '/products/margarita.png',
+    color: '#c1e601',
+    featured: false
+  },
+  {
+    id: 'espresso-martini',
+    name: 'ESPRESSO MARTINI',
+    taste: 'Bold & Classic',
+    spirit: 'Vodka Based',
+    format: 'Bottle',
+    image: '/products/espresso-martini.png',
+    color: '#8a560c',
+    featured: false
+  },
+  {
+    id: 'long-island-iced-tea',
+    name: 'LONG ISLAND ICED TEA',
+    taste: 'Bold & Classic',
+    spirit: 'Other Spirits',
+    format: 'Bottle',
+    image: '/products/long-island-iced-tea.png',
+    color: '#bf7c40',
+    featured: false
+  },
+  {
+    id: 'cosmopolitan',
+    name: 'COSMOPOLITAN',
+    taste: 'Citric & Fresh',
+    spirit: 'Vodka Based',
+    format: 'Bottle',
+    image: '/products/cosmopolitan.png',
+    color: '#c63d38',
+    featured: false
+  },
+  {
+    id: 'negroni',
+    name: 'NEGRONI',
+    taste: 'Bold & Classic',
+    spirit: 'Other Spirits',
+    format: 'Bottle',
+    image: '/products/negroni.png',
+    color: '#953a30',
+    featured: false
+  },
+  {
+    id: 'amaretto-sour',
+    name: 'AMARETTO SOUR',
+    taste: 'Sweet & Smooth',
+    spirit: 'Other Spirits',
+    format: 'Bottle',
+    image: '/products/amaretto-sour.png',
+    color: '#9e5933',
+    featured: false
   }
 ];
 

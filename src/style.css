@@ -268,10 +268,24 @@ button {
   width: auto;
   object-fit: contain;
   transition: var(--transition-smooth);
+  transform-origin: 50% 92%; /* pivot at the base of the bottle */
 }
 
 .cocktail-card:hover .card-square img {
   transform: scale(1.05);
+}
+
+/* Bottle sways side to side while the card is hovered */
+@keyframes bottle-wave {
+  0%, 100% { transform: scale(1.05) rotate(0deg); }
+  25%      { transform: scale(1.05) rotate(-6deg); }
+  75%      { transform: scale(1.05) rotate(6deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cocktail-card:hover .card-square img {
+    animation: bottle-wave 1.4s ease-in-out infinite;
+  }
 }
 
 .bestseller-badge {
